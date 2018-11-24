@@ -3,21 +3,27 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0AA8564321A1855F00B8F4C0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0AA8564221A1855F00B8F4C0 /* main.cpp */; };
+		0AA8564E21A188DF00B8F4C0 /* libopencv_highgui.3.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA8564A21A187AD00B8F4C0 /* libopencv_highgui.3.4.3.dylib */; };
+		0AA8565021A1898D00B8F4C0 /* libopencv_core.3.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA8564F21A1898D00B8F4C0 /* libopencv_core.3.4.3.dylib */; };
+		0AA8565221A189E600B8F4C0 /* libopencv_imgproc.3.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA8565121A189E600B8F4C0 /* libopencv_imgproc.3.4.3.dylib */; };
+		0AA8565621A74BDD00B8F4C0 /* libopencv_imgcodecs.3.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA8565521A74BDD00B8F4C0 /* libopencv_imgcodecs.3.4.3.dylib */; };
+		0AA8565721A74DAF00B8F4C0 /* libopencv_objdetect.3.4.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA8565321A1A45C00B8F4C0 /* libopencv_objdetect.3.4.3.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		0AA8563D21A1855F00B8F4C0 /* CopyFiles */ = {
+		0AA8563D21A1855F00B8F4C0 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -25,6 +31,12 @@
 /* Begin PBXFileReference section */
 		0AA8563F21A1855F00B8F4C0 /* evalfocus */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = evalfocus; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AA8564221A1855F00B8F4C0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		0AA8564A21A187AD00B8F4C0 /* libopencv_highgui.3.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.3.4.3.dylib; path = ../../../../opt/local/lib/libopencv_highgui.3.4.3.dylib; sourceTree = "<group>"; };
+		0AA8564C21A1887D00B8F4C0 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../../../../opt/local/lib; sourceTree = "<group>"; };
+		0AA8564F21A1898D00B8F4C0 /* libopencv_core.3.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_core.3.4.3.dylib; path = ../../../../opt/local/lib/libopencv_core.3.4.3.dylib; sourceTree = "<group>"; };
+		0AA8565121A189E600B8F4C0 /* libopencv_imgproc.3.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.3.4.3.dylib; path = ../../../../opt/local/lib/libopencv_imgproc.3.4.3.dylib; sourceTree = "<group>"; };
+		0AA8565321A1A45C00B8F4C0 /* libopencv_objdetect.3.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_objdetect.3.4.3.dylib; path = ../../../../opt/local/lib/libopencv_objdetect.3.4.3.dylib; sourceTree = "<group>"; };
+		0AA8565521A74BDD00B8F4C0 /* libopencv_imgcodecs.3.4.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgcodecs.3.4.3.dylib; path = ../../../../opt/local/lib/libopencv_imgcodecs.3.4.3.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +44,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AA8565721A74DAF00B8F4C0 /* libopencv_objdetect.3.4.3.dylib in Frameworks */,
+				0AA8565621A74BDD00B8F4C0 /* libopencv_imgcodecs.3.4.3.dylib in Frameworks */,
+				0AA8565221A189E600B8F4C0 /* libopencv_imgproc.3.4.3.dylib in Frameworks */,
+				0AA8565021A1898D00B8F4C0 /* libopencv_core.3.4.3.dylib in Frameworks */,
+				0AA8564E21A188DF00B8F4C0 /* libopencv_highgui.3.4.3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +60,7 @@
 			children = (
 				0AA8564121A1855F00B8F4C0 /* evalfocus */,
 				0AA8564021A1855F00B8F4C0 /* Products */,
+				0AA8564921A187AD00B8F4C0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +80,19 @@
 			path = evalfocus;
 			sourceTree = "<group>";
 		};
+		0AA8564921A187AD00B8F4C0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0AA8565521A74BDD00B8F4C0 /* libopencv_imgcodecs.3.4.3.dylib */,
+				0AA8565321A1A45C00B8F4C0 /* libopencv_objdetect.3.4.3.dylib */,
+				0AA8565121A189E600B8F4C0 /* libopencv_imgproc.3.4.3.dylib */,
+				0AA8564F21A1898D00B8F4C0 /* libopencv_core.3.4.3.dylib */,
+				0AA8564C21A1887D00B8F4C0 /* lib */,
+				0AA8564A21A187AD00B8F4C0 /* libopencv_highgui.3.4.3.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -71,7 +102,7 @@
 			buildPhases = (
 				0AA8563B21A1855F00B8F4C0 /* Sources */,
 				0AA8563C21A1855F00B8F4C0 /* Frameworks */,
-				0AA8563D21A1855F00B8F4C0 /* CopyFiles */,
+				0AA8563D21A1855F00B8F4C0 /* Copy Files */,
 			);
 			buildRules = (
 			);
@@ -97,7 +128,7 @@
 				};
 			};
 			buildConfigurationList = 0AA8563A21A1855F00B8F4C0 /* Build configuration list for PBXProject "evalfocus" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -241,7 +272,13 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DZUEVJ5GD7;
+				HEADER_SEARCH_PATHS = /opt/local/include;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -250,7 +287,13 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DZUEVJ5GD7;
+				HEADER_SEARCH_PATHS = /opt/local/include;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
