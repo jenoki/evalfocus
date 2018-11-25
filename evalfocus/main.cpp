@@ -14,9 +14,10 @@ using namespace cv;
 using namespace std;
 string default_face_cascade_file = "/opt/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml";
 string default_eyes_cascade_file = "/opt/local/share/OpenCV/haarcascades/haarcascade_eye.xml";
+const double process_version = 0.1;
 
-//extern char *optarg;
-//extern int optind, opterr;
+extern char *optarg;
+extern int optind, opterr;
 
 int main(int argc, char * argv[]) {
     CascadeClassifier face_cascade;
@@ -32,21 +33,27 @@ int main(int argc, char * argv[]) {
     string source_file;
     string face_cascade_file;
     string eyes_cascade_file;
+    string log_file;
     int op;
     opterr = 0;
-    while ( (op = getopt(argc,argv,"f:c:")) != -1){
+    while ( (op = getopt(argc,argv,"f:c:l:")) != -1){
         switch (op){
             case 'f':
                 source_file = optarg;
                 break;
             case 'c':
                 face_cascade_file = optarg;
+                break;
+            case 'l':
+                log_file = optarg;
+                break;
         }
     }
     
     if (source_file.empty()){
         source_file = argv[1];
     }
+
     if (face_cascade_file.empty()){
         face_cascade_file = default_face_cascade_file;
     }
@@ -61,6 +68,13 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
+    //
+    if (!log_file.empty()){
+        ofstream clog(log_file);
+        clog << "Process Version:" << process_version << endl;
+    }
+    
+    //Load source image
     source_image = imread(source_file,IMREAD_GRAYSCALE);
     int longside = max(source_image.size().width,source_image.size().height);
     int rectsize = longside / 16;
@@ -69,7 +83,8 @@ int main(int argc, char * argv[]) {
     
     face_cascade.detectMultiScale(source_image, faces, scale_factor, min_neighbors, CASCADE_FIND_BIGGEST_OBJECT , min_face);
     cout << "detected faces: "<< faces.size() << endl;
-    
+    if (clog.good()) clog << "detected faces: "<< faces.size() << endl;
+
     Mat roi_face;
     for (int i = 0; i < faces.size(); i++){
         Point origin(faces[i].x,faces[i].y);
@@ -78,11 +93,13 @@ int main(int argc, char * argv[]) {
         int eye_factor = 16;
         min_eyes = Size(faces[i].width / eye_factor, faces[i].height / eye_factor);
         eyes_cascade.detectMultiScale(roi_face, eyes,scale_factor,min_neighbors,CASCADE_FIND_BIGGEST_OBJECT,min_eyes);
+
         cout << "face: " << (i+1) << " eyes: " << eyes.size() ;
+        if (clog.good()) clog << "detected faces: " << faces.size() << endl;
+
         if(eyes.size() > 0){
 #if 0
-            //draw rectangle
-            rectangle(source_image, Point(faces[i].x,faces[i].y),Point(faces[i].x + faces[i].width,faces[i].y + faces[i].height),Scalar(200,200,0),1,CV_AA);
+            //draw rectangle to face
             for (int j = 0; j < eyes.size(); j++){
                 rectangle(roi_face, Point(eyes[j].x,eyes[j].y),Point(eyes[j].x + eyes[j].width,eyes[j].y + eyes[j].height),Scalar(0,200,0),2,CV_AA);
             }
@@ -91,7 +108,6 @@ int main(int argc, char * argv[]) {
             int opty = getOptimalDFTSize( roi_face.cols );
             Mat padded_face;
             copyMakeBorder(roi_face, padded_face, 0, optx - roi_face.rows, 0, opty - roi_face.cols, BORDER_CONSTANT, Scalar::all(0));
-            
             
             Mat planes[] = {Mat_<float>(padded_face), Mat::zeros(padded_face.size(), CV_32F)};
             Mat complexI;
@@ -105,6 +121,7 @@ int main(int argc, char * argv[]) {
             log(magI, magI);
             // crop the spectrum, if it has an odd number of rows or columns
             magI = magI(Rect(0, 0, magI.cols & -2, magI.rows & -2));
+
 #if 0
             // rearrange the quadrants of Fourier image  so that the origin is at the image center
             int cx = magI.cols/2;
@@ -121,12 +138,16 @@ int main(int argc, char * argv[]) {
             q2.copyTo(q1);
             tmp.copyTo(q2);
 #endif
+
             int crop = 8;
-            Point origin(magI.cols/crop,magI.rows/crop);
+            Point origin(magI.cols/crop, magI.rows/crop);
             Size area(magI.cols - (magI.cols/crop), magI.rows - (magI.cols/crop));
             Mat hf_area = magI(Rect(origin,area));
-            cout << " avg: " << (int)( (mean(hf_area)[0] * 10.0) + 0.5 );
-            
+
+            int avg_hf = (int)( (mean(hf_area)[0] * 10.0) + 0.5 );
+            cout << " avg: " << avg_hf;
+            if (clog.good()) clog << "avg: " << avg_hf;
+
             normalize(magI, magI, 0, 1, NORM_MINMAX); // Transform the matrix with float values into a
             // viewable image form (float between values 0 and 1).
 //            imshow("Input Image", roi_face);    // Show the result
@@ -134,5 +155,6 @@ int main(int argc, char * argv[]) {
 //            waitKey();
         }
         cout << endl;
+        if (clog.good()) clog << endl;
     }
 }
