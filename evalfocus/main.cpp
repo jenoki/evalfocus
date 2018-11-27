@@ -26,16 +26,26 @@ int main(int argc, char * argv[]) {
     vector<Rect> eyes;
     Size min_face;
     Size min_eyes;
-    int min_neighbors = 3;
-    double scale_factor = 1.15;
+    const int min_neighbors = 3;
+    const double scale_factor = 1.15;
 
     Mat source_image;
     string source_file;
     string face_cascade_file;
     string eyes_cascade_file;
     string log_file;
+    ofstream clog;
+    
     int op;
     opterr = 0;
+    
+    // Command Line Analyze.
+    
+    if (argc == 1){
+        cerr << "Usage:evalfocus [-c cascade] [-l logfile] [-f] <image>" << endl;
+        exit(0);
+    }
+    
     while ( (op = getopt(argc,argv,"f:c:l:")) != -1){
         switch (op){
             case 'f':
@@ -54,6 +64,7 @@ int main(int argc, char * argv[]) {
         source_file = argv[1];
     }
 
+    //Load cascades for faces.
     if (face_cascade_file.empty()){
         face_cascade_file = default_face_cascade_file;
     }
@@ -62,50 +73,54 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
+    //Load cascades for eyes.
     eyes_cascade_file = default_eyes_cascade_file;
     if (!eyes_cascade.load(eyes_cascade_file)){
         cerr << "eyes cascade file not found." << endl;
         exit(1);
     }
-
-    //
+    //Create log file
     if (!log_file.empty()){
-        ofstream clog(log_file);
-        clog << "Process Version:" << process_version << endl;
+        clog.open(log_file);
+        if (clog.is_open()) clog << "Process_Version:" << process_version << endl;
     }
     
     //Load source image
     source_image = imread(source_file,IMREAD_GRAYSCALE);
-    int longside = max(source_image.size().width,source_image.size().height);
-    int rectsize = longside / 16;
-    min_face = Size(rectsize,rectsize);
-//  imshow("source",source_image);
     
-    face_cascade.detectMultiScale(source_image, faces, scale_factor, min_neighbors, CASCADE_FIND_BIGGEST_OBJECT , min_face);
-    cout << "detected faces: "<< faces.size() << endl;
-    if (clog.good()) clog << "detected faces: "<< faces.size() << endl;
+    //Detect faces
+    int longside = max(source_image.size().width,source_image.size().height);
+    int rectsize = longside / 32; //minimum size of face detect
+    int face_flag = CASCADE_FIND_BIGGEST_OBJECT;
+    min_face = Size(rectsize,rectsize);
 
-    Mat roi_face;
+    face_cascade.detectMultiScale(source_image, faces, scale_factor, min_neighbors, face_flag , min_face);
+    cout << "detected_faces:"<< faces.size() << endl;
+    if (clog.is_open()) clog << "detected_faces:"<< faces.size() << endl;
+
+    if (faces.size() == 0) {
+        exit(0);
+    }
+    
+    //Loop for found faces
+    double max_avg = 0.0; //Max average value from faces
     for (int i = 0; i < faces.size(); i++){
+        //Detect eyes from current face
         Point origin(faces[i].x,faces[i].y);
         Size area(faces[i].width,faces[i].height);
-        roi_face = source_image(Rect(origin, area));
+        Mat roi_face = source_image(Rect(origin, area));//For detect eyes.
         int eye_factor = 16;
-        min_eyes = Size(faces[i].width / eye_factor, faces[i].height / eye_factor);
-        eyes_cascade.detectMultiScale(roi_face, eyes,scale_factor,min_neighbors,CASCADE_FIND_BIGGEST_OBJECT,min_eyes);
+        int eye_flag = CASCADE_FIND_BIGGEST_OBJECT;
+        min_eyes = Size(faces[i].width/eye_factor, faces[i].height/eye_factor);
+        eyes_cascade.detectMultiScale(roi_face, eyes,scale_factor, min_neighbors, eye_flag, min_eyes);
 
-        cout << "face: " << (i+1) << " eyes: " << eyes.size() ;
-        if (clog.good()) clog << "detected faces: " << faces.size() << endl;
+        cout << "face:" << (i+1) << " eyes:" << eyes.size() ;
+        if (clog.is_open()) clog << "face:" << (i+1) << " eyes:" << eyes.size() ;
 
         if(eyes.size() > 0){
-#if 0
-            //draw rectangle to face
-            for (int j = 0; j < eyes.size(); j++){
-                rectangle(roi_face, Point(eyes[j].x,eyes[j].y),Point(eyes[j].x + eyes[j].width,eyes[j].y + eyes[j].height),Scalar(0,200,0),2,CV_AA);
-            }
-#endif
-            int optx = getOptimalDFTSize( roi_face.rows );
-            int opty = getOptimalDFTSize( roi_face.cols );
+            //If found eye, evaluate focus accuracy from face.
+            int optx = getOptimalDFTSize(roi_face.rows);
+            int opty = getOptimalDFTSize(roi_face.cols);
             Mat padded_face;
             copyMakeBorder(roi_face, padded_face, 0, optx - roi_face.rows, 0, opty - roi_face.cols, BORDER_CONSTANT, Scalar::all(0));
             
@@ -117,44 +132,33 @@ int main(int argc, char * argv[]) {
             magnitude(planes[0], planes[1], planes[0]);// planes[0] = magnitude
             Mat magI = planes[0];
 
-            magI += Scalar::all(1);                    // switch to logarithmic scale
+            magI += Scalar::all(1);      // switch to logarithmic scale
             log(magI, magI);
             // crop the spectrum, if it has an odd number of rows or columns
             magI = magI(Rect(0, 0, magI.cols & -2, magI.rows & -2));
 
-#if 0
-            // rearrange the quadrants of Fourier image  so that the origin is at the image center
-            int cx = magI.cols/2;
-            int cy = magI.rows/2;
-            Mat q0(magI, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
-            Mat q1(magI, Rect(cx, 0, cx, cy));  // Top-Right
-            Mat q2(magI, Rect(0, cy, cx, cy));  // Bottom-Left
-            Mat q3(magI, Rect(cx, cy, cx, cy)); // Bottom-Right
-            Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
-            q0.copyTo(tmp);
-            q3.copyTo(q0);
-            tmp.copyTo(q3);
-            q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
-            q2.copyTo(q1);
-            tmp.copyTo(q2);
-#endif
-
-            int crop = 8;
+            //Get high frequency area from DFT result.
+            const int crop = 8;
             Point origin(magI.cols/crop, magI.rows/crop);
             Size area(magI.cols - (magI.cols/crop), magI.rows - (magI.cols/crop));
             Mat hf_area = magI(Rect(origin,area));
 
-            int avg_hf = (int)( (mean(hf_area)[0] * 10.0) + 0.5 );
-            cout << " avg: " << avg_hf;
-            if (clog.good()) clog << "avg: " << avg_hf;
+            double hf_avg = mean(hf_area)[0];
+            if (max_avg < hf_avg) {
+                max_avg = hf_avg;
+            }
+            cout << " avg:" << hf_avg;
+            if (clog.is_open()) clog << "avg:" << hf_avg;
 
             normalize(magI, magI, 0, 1, NORM_MINMAX); // Transform the matrix with float values into a
             // viewable image form (float between values 0 and 1).
-//            imshow("Input Image", roi_face);    // Show the result
-//            imshow("spectrum magnitude", magI);
-//            waitKey();
         }
         cout << endl;
-        if (clog.good()) clog << endl;
+        if (clog.is_open()) clog << endl;
     }
+    //Output result
+    int accuracy = (int)((max_avg * 10.0) + 0.5);
+    cout << "accuracy:" << accuracy << endl;
+    if (clog.is_open()) clog << "accuracy:" << accuracy << endl;
+    exit(accuracy);
 }
